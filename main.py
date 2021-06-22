@@ -6,6 +6,22 @@ import math
 from time import sleep
 
 
+def reconnect_client(client, userdata, rc):
+    client.connect("localhost")
+
+
+def update_matrix(vol):
+    rank = math.floor(81 / 100 * vol)
+    matrix = nuimo.LedMatrix(" " * (81 - rank) + "*" * rank)
+    controller.display_matrix(matrix, interval=30, fading=True)
+
+
+def on_message(client, userdata, message):
+    print("mqtt message recieved", message)
+    if message.topic == "nuimo/spotify/volume/get":
+        update_matrix(int(message.payload))
+
+
 class MQTTListener(nuimo.ControllerListener):
 
     def __init__(self):
@@ -14,7 +30,8 @@ class MQTTListener(nuimo.ControllerListener):
         self.buffer = []
         self.running = False
         self.thread = threading.Thread(target=self.send_average)
-        self.client.on_message = MQTTListener.on_message
+        self.client.on_message = on_message
+        self.client.on_disconnect = reconnect_client
         self.client.subscribe("nuimo/spotify/volume/get")
 
     def publish_volume_set(self, volume):
@@ -25,25 +42,6 @@ class MQTTListener(nuimo.ControllerListener):
 
     def send_play_pause(self):
         self.client.publish("spotify/play_state/set", "")
-
-    def flatten(self, volume):
-        self.buffer += 1
-        if self.buffer == 10:
-            self.publish_volume_set(volume)
-            self.buffer = 0
-            self.update_matrix(volume)
-
-    @staticmethod
-    def update_matrix(vol):
-        rank = math.floor(81 / 100 * vol)
-        matrix = nuimo.LedMatrix(" " * (81 - rank) + "*" * rank)
-        controller.display_matrix(matrix, interval=30, fading=True)
-
-    @staticmethod
-    def on_message(client, userdata, message):
-        print("mqtt message recieved", message)
-        if message.topic == "nuimo/spotify/volume/get":
-            MQTTListener.update_matrix(int(message.payload))
 
     def send_average(self):
         print("send in 1 sec")
@@ -58,7 +56,7 @@ class MQTTListener(nuimo.ControllerListener):
         print("reset variables")
 
     def received_gesture_event(self, event):
-        if (event.gesture == nuimo.Gesture.ROTATION):
+        if event.gesture == nuimo.Gesture.ROTATION:
             self.buffer.append(event.value)
             if not self.running:
                 self.running = True
@@ -70,7 +68,7 @@ class MQTTListener(nuimo.ControllerListener):
         print("started connecting")
 
     def connect_succeeded(self):
-        print("connect sucessfull")
+        print("connect successfully")
 
     def connect_failed(self, error):
         print("connect failed", error)
@@ -79,7 +77,7 @@ class MQTTListener(nuimo.ControllerListener):
         print("started disconnecting")
 
     def disconnect_succeeded(self):
-        print("disconnect succeded")
+        print("disconnect succeeded")
 
 
 manager = nuimo.ControllerManager(adapter_name='hci0')
