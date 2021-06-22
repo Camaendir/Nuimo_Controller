@@ -41,6 +41,7 @@ class MQTTListener(nuimo.ControllerListener):
 
     @staticmethod
     def on_message(client, userdata, message):
+        print("mqtt message recieved", message)
         if message.topic == "nuimo/spotify/volume/get":
             MQTTListener.update_matrix(int(message.payload))
 
@@ -50,7 +51,7 @@ class MQTTListener(nuimo.ControllerListener):
         print("send now")
         val_sum = sum(self.buffer)
         self.buffer = []
-        self.publish_volume_increase(val_sum)
+        self.publish_volume_increase(val_sum // 60)
         print("send via mqtt")
         self.thread = threading.Thread(target=self.send_average)
         self.running = False
