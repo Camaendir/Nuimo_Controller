@@ -6,6 +6,12 @@ import math
 from time import sleep
 
 
+VERBOSE = False
+
+def print_ln(*args):
+    if VERBOSE:
+        print(*args)
+
 def reconnect_client(client, userdata, rc):
     client.connect("localhost")
 
@@ -17,7 +23,7 @@ def update_matrix(vol):
 
 
 def on_message(client, userdata, message):
-    print("mqtt message recieved", message)
+    print_ln("mqtt message recieved", message)
     if message.topic == "nuimo/spotify/volume/get":
         update_matrix(int(message.payload))
 
@@ -48,16 +54,16 @@ class MQTTListener(nuimo.ControllerListener):
         self.client.publish("spotify/play_state/set", "")
 
     def send_average(self):
-        print("send in 1 sec")
+        print_ln("send in 1 sec")
         sleep(0.2)
-        print("send now")
+        print_ln("send now")
         val_sum = sum(self.buffer)
         self.buffer = []
         self.publish_volume_increase(val_sum // 60)
-        print("send via mqtt")
+        print_ln("send via mqtt")
         self.thread = threading.Thread(target=self.send_average)
         self.running = False
-        print("reset variables")
+        print_ln("reset variables")
 
     def received_gesture_event(self, event):
         if event.gesture == nuimo.Gesture.ROTATION:
@@ -69,23 +75,23 @@ class MQTTListener(nuimo.ControllerListener):
             self.send_play_pause()
 
     def started_connecting(self):
-        print("started connecting")
+        print_ln("started connecting")
 
     def connect_succeeded(self):
-        print("connect successfully")
+        print_ln("connect successfully")
 
     def connect_failed(self, error):
-        print("connect failed", error)
+        print_ln("connect failed", error)
 
     def started_disconnecting(self):
-        print("started disconnecting")
+        print_ln("started disconnecting")
 
     def disconnect_succeeded(self):
-        print("disconnect succeeded")
+        print_ln("disconnect succeeded")
 
 
 manager = nuimo.ControllerManager(adapter_name='hci0')
-print("Using Mac: dc:1c:77:d0:9a:d9")
+print_ln("Using Mac: dc:1c:77:d0:9a:d9")
 controller = nuimo.Controller(mac_address='dc:1c:77:d0:9a:d9', manager=manager)
 controller.listener = MQTTListener()
 controller.connect()
