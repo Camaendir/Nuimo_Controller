@@ -5,7 +5,6 @@ import paho.mqtt.subscribe as subscribe
 import math
 from time import sleep
 
-ctr = None
 
 def reconnect_client(client, userdata, rc):
     client.connect("localhost")
@@ -14,7 +13,7 @@ def reconnect_client(client, userdata, rc):
 def update_matrix(vol):
     rank = math.floor(81 / 100 * vol)
     matrix = nuimo.LedMatrix(" " * (81 - rank) + "*" * rank)
-    ctr.display_matrix(matrix, interval=2, fading=True)
+    controller.display_matrix(matrix, interval=2, fading=True)
 
 
 def on_message(client, userdata, message):
@@ -50,7 +49,7 @@ class MQTTListener(nuimo.ControllerListener):
 
     def send_average(self):
         print("send in 1 sec")
-        sleep(1.0)
+        sleep(0.2)
         print("send now")
         val_sum = sum(self.buffer)
         self.buffer = []
@@ -90,6 +89,5 @@ print("Using Mac: dc:1c:77:d0:9a:d9")
 controller = nuimo.Controller(mac_address='dc:1c:77:d0:9a:d9', manager=manager)
 controller.listener = MQTTListener()
 controller.connect()
-ctr = controller
 x = threading.Thread(target=manager.run)
 x.start()
