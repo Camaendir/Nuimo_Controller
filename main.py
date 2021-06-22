@@ -59,6 +59,7 @@ def on_message(client, userdata, message):
 
 def on_connect(client, userdata, flags, rc):
     client.subscribe("nuimo/spotify/volume/get")
+    client.subscribe("nuimo/spotify/status/get")
 
 class MQTTListener(nuimo.ControllerListener):
 
@@ -72,9 +73,6 @@ class MQTTListener(nuimo.ControllerListener):
         self.client.on_disconnect = reconnect_client
         self.client.on_connect = on_connect
         self.client.loop_start()
-
-    def publish_volume_set(self, volume):
-        self.client.publish("spotify/volume/set", str(volume))
 
     def publish_volume_increase(self, volume):
         self.client.publish("spotify/volume/increase", str(volume))
