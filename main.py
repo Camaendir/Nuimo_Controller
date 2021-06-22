@@ -7,6 +7,27 @@ from time import sleep
 
 
 VERBOSE = False
+play_matrix = nuimo.LedMatrix(
+    "".join(
+        [
+            "         ",
+            "  ***    ",
+            "  * **   ",
+            "  *  **  ",
+            "  *   ** ",
+            "  *  **  ",
+            "  * **   ",
+            "  ***    ",
+            "         "
+        ]
+    )
+)
+
+pause_matrix = nuimo.LedMatrix(
+    "".join(
+        [" "*9] + ["  ** **  " for _ in range(7)] + [" "*9]
+    )
+)
 
 def print_ln(*args):
     if VERBOSE:
@@ -16,16 +37,24 @@ def reconnect_client(client, userdata, rc):
     client.connect("localhost")
 
 
-def update_matrix(vol):
+def update_matrix_volume(vol):
     rank = math.floor(81 / 100 * vol)
     matrix = nuimo.LedMatrix(" " * (81 - rank) + "*" * rank)
     controller.display_matrix(matrix, interval=2, fading=True)
+
+def update_matrix_status(status):
+    if status:
+        controller.display_matrix(play_matrix, interval=5, fading=True)
+    else:
+        controller.display_matrix(pause_matrix, interval=5, fading=True)
 
 
 def on_message(client, userdata, message):
     print_ln("mqtt message recieved", message)
     if message.topic == "nuimo/spotify/volume/get":
-        update_matrix(int(message.payload))
+        update_matrix_volume(int(message.payload))
+    elif message.topic == "nuimo/spotify/status/get":
+        update_matrix_status(message.payload != "true")
 
 
 def on_connect(client, userdata, flags, rc):
