@@ -5,6 +5,7 @@ import paho.mqtt.subscribe as subscribe
 import math
 from time import sleep
 
+ctr = None
 
 def reconnect_client(client, userdata, rc):
     client.connect("localhost")
@@ -13,7 +14,7 @@ def reconnect_client(client, userdata, rc):
 def update_matrix(vol):
     rank = math.floor(81 / 100 * vol)
     matrix = nuimo.LedMatrix(" " * (81 - rank) + "*" * rank)
-    controller.display_matrix(matrix, interval=30, fading=True)
+    ctr.display_matrix(matrix, interval=2, fading=True)
 
 
 def on_message(client, userdata, message):
@@ -21,6 +22,9 @@ def on_message(client, userdata, message):
     if message.topic == "nuimo/spotify/volume/get":
         update_matrix(int(message.payload))
 
+
+def on_connect(client, userdata, flags, rc):
+    client.subscribe("nuimo/spotify/volume/get")
 
 class MQTTListener(nuimo.ControllerListener):
 
@@ -32,7 +36,8 @@ class MQTTListener(nuimo.ControllerListener):
         self.thread = threading.Thread(target=self.send_average)
         self.client.on_message = on_message
         self.client.on_disconnect = reconnect_client
-        self.client.subscribe("nuimo/spotify/volume/get")
+        self.client.on_connect = on_connect
+        self.client.loop_start()
 
     def publish_volume_set(self, volume):
         self.client.publish("spotify/volume/set", str(volume))
@@ -85,5 +90,6 @@ print("Using Mac: dc:1c:77:d0:9a:d9")
 controller = nuimo.Controller(mac_address='dc:1c:77:d0:9a:d9', manager=manager)
 controller.listener = MQTTListener()
 controller.connect()
+ctr = controller
 x = threading.Thread(target=manager.run)
 x.start()
