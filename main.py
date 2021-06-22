@@ -45,12 +45,16 @@ class MQTTListener(nuimo.ControllerListener):
             MQTTListener.update_matrix(int(message.payload))
 
     def send_average(self):
+        print("send in 1 sec")
         sleep(1.0)
+        print("send now")
         val_sum = sum(self.buffer)
         self.buffer = []
         self.publish_volume_increase(val_sum)
+        print("send via mqtt")
         self.thread = threading.Thread(target=self.send_average)
         self.running = False
+        print("reset variables")
 
     def received_gesture_event(self, event):
         if (event.gesture == nuimo.Gesture.ROTATION):
