@@ -54,10 +54,7 @@ def on_message(client, userdata, message):
     if message.topic == "nuimo/spotify/volume/get":
         update_matrix_volume(int(message.payload))
     elif message.topic == "nuimo/spotify/status/get":
-        print(message.payload)
-        print(type(message.payload))
-        print(message.payload == "true")
-        update_matrix_status(message.payload != "true")
+        update_matrix_status(message.payload != b"true")
 
 
 def on_connect(client, userdata, flags, rc):
