@@ -3,6 +3,7 @@ import threading
 import paho.mqtt.client as mqtt
 import paho.mqtt.subscribe as subscribe
 import math
+from time import sleep
 
 
 class MQTTListener(nuimo.ControllerListener):
@@ -44,9 +45,11 @@ class MQTTListener(nuimo.ControllerListener):
             MQTTListener.update_matrix(int(message.payload))
 
     def send_average(self):
+        sleep(1.0)
         val_sum = sum(self.buffer)
         self.buffer = []
         self.publish_volume_increase(val_sum)
+        self.thread = threading.Thread(target=self.send_average)
         self.running = False
 
     def received_gesture_event(self, event):
