@@ -4,7 +4,7 @@ from copy import deepcopy
 def wrap(input):
     output = []
     for i in range(9):
-        output.append(input[i:i+9])
+        output.append(input[(i*9):(i*9)+9])
     return output
 
 play_matrix = LedMatrix(
@@ -132,7 +132,7 @@ numbers = (
         "   *     ",
         "   *     ",
         "   *     ",
-        "   *     ",
+        "         ",
         "         ",
     ]),
 
@@ -262,25 +262,26 @@ def shift_matrix(matrix, shift):
     matrix = deepcopy(matrix)
     #print_matrix(matrix)
     lines = wrap(matrix)
+    new_lines = []
     #print_matrix_lines(lines)
     if shift > 0:
         for l in lines:
-            l = (" "*shift + l)[:9]
+            new_lines.append(((" "*shift) + l)[:9])
     else:
         for l in lines:
-            l = (l + " "*(-1*shift))[-9:]
+            new_lines.append((l + " "*(-1*shift))[-9:])
     #print_matrix_lines(lines)
-    return "".join(lines)
+    return "".join(new_lines)
 
 def get_matrix_from_number(number):
     if number >= 100:
         return one_hundred
     one_er = number % 10
     ten_er = number // 10
-    print("matrix", number, ten_er, one_er)
-    print_matrix(numbers[ten_er])
-    print_matrix(numbers[one_er])
-    print_matrix(shift_matrix(numbers[one_er], 5))
+    #print("matrix", number, ten_er, one_er)
+    #print_matrix(numbers[ten_er])
+    #print_matrix(numbers[one_er])
+    #print_matrix(shift_matrix(numbers[one_er], 5))
     return LedMatrix(add_matrices(numbers[ten_er], shift_matrix(numbers[one_er], 5)))
 
 def print_matrix_lines(lines):
