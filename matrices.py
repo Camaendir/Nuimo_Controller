@@ -20,14 +20,12 @@ play_matrix = LedMatrix(
             "   *     ",
             "         "
         ]
-    )
-)
+    ))
 
 pause_matrix = LedMatrix(
     "".join(
         [" "*9] + ["  ** **  " for _ in range(7)] + [" "*9]
-    )
-)
+    ))
 
 lightbulb_matrix = LedMatrix(
     "".join(
@@ -42,8 +40,7 @@ lightbulb_matrix = LedMatrix(
             "   ***   ",
             "   ***   "
         ]
-    )
-)
+    ))
 
 next_symbol = "".join(
         [
@@ -60,12 +57,10 @@ next_symbol = "".join(
     )
 
 next_matrix = LedMatrix(
-    next_symbol
-)
+    next_symbol)
 
 last_matrix = LedMatrix(
-    next_symbol[::-1]
-)
+    next_symbol[::-1])
 
 music_matrix = LedMatrix(
     "".join([
@@ -78,8 +73,7 @@ music_matrix = LedMatrix(
         "*** ***  ",
         " *   *   ",
         "         "
-    ])
-)
+    ]))
 
 light_matrix = LedMatrix(
     "".join([
@@ -92,8 +86,7 @@ light_matrix = LedMatrix(
         "         ",
         " *     * ",
         "    *    "
-    ])
-)
+    ]))
 
 light_matrix_2 = LedMatrix(
     "".join([
@@ -106,10 +99,7 @@ light_matrix_2 = LedMatrix(
         "  *   *  ",
         "    *    ",
         "         "
-    ])
-)
-
-
+    ]))
 
 numbers = (
         "".join([
@@ -126,13 +116,13 @@ numbers = (
 
     "".join([
         "         ",
-        "   *     ",
-        "   *     ",
-        "   *     ",
-        "   *     ",
-        "   *     ",
-        "   *     ",
-        "         ",
+        "  *      ",
+        "  *      ",
+        "  *      ",
+        "  *      ",
+        "  *      ",
+        "  *      ",
+        "  *      ",
         "         ",
     ]),
 
@@ -230,11 +220,9 @@ numbers = (
         "   *     ",
         " **      ",
         "         ",
-    ])
+    ]))
 
-)
-
-
+numbers_matrix = [LedMatrix(n) for n in deepcopy(numbers)]
 
 one_hundred =  LedMatrix("".join([
         "         ",
@@ -248,8 +236,32 @@ one_hundred =  LedMatrix("".join([
         "         ",
     ]))
 
-numbers_matrix = [LedMatrix(n) for n in deepcopy(numbers)]
-matrix_list = (play_matrix, pause_matrix, next_matrix, last_matrix, music_matrix, light_matrix, lightbulb_matrix, one_hundred)
+loudspeaker_matrix = LedMatrix(
+    "".join([
+        " ******* ",
+        " *     * ",
+        " *  *  * ",
+        " *     * ",
+        " *  *  * ",
+        " * * * * ",
+        " *  *  * ",
+        " *     * ",
+        " ******* "
+    ]))
+
+heart_matrix = LedMatrix(
+    "".join([
+        "         ",
+        "  ** **  ",
+        " ******* ",
+        " ******* ",
+        " ******* ",
+        "  *****  ",
+        "   ***   ",
+        "    *    ",
+        "         "
+    ]))
+
 
 
 def add_matrices(m1, m2):

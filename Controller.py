@@ -10,14 +10,16 @@ class Direction(Enum):
     BOTTOM = 3
 
 class SubController:
-    def __init__(self, controller, manager):
+    def __init__(self, light_up_matrix, controller, manager):
         self.active = False
         self.controller = controller
         self.manager = manager
         self.manager.register(self)
+        self.light_up_matrix = light_up_matrix
     
     def activate(self):
         self.active = True
+        self.send_matrix(self.light_up_matrix, interval=5)
     
     def deactivate(self):
         self.active = False
@@ -45,7 +47,8 @@ class SubController:
 
 class MQTTClientManager(nuimo.ControllerListener):
 
-    def __init__(self):
+    def __init__(self, controller):
+        self.controller = controller
         self.client = mqtt.Client("Nuimo")
         self.subscriptions = []
         self.client.on_message = self.on_message
@@ -61,28 +64,37 @@ class MQTTClientManager(nuimo.ControllerListener):
     def change_active(self, increase_by=1):
         if self.active:
             self.active.deactivate()
+            if isinstance(self.active, MQTTSubController):
+                for t in self.submodules[self.active_index][1]:
+                    self.client.unsubscribe(t)
             self.active_index += increase_by
             self.active_index %= len(self.submodules)
             self.active = self.submodules[self.active_index][0]
             self.active.activate()
+            if isinstance(self.active, MQTTSubController):
+                for t in self.submodules[self.active_index][1]:
+                    self.client.subscribe(t)
         else:
             if self.submodules != []:
                 self.active_index = 0
                 self.active = self.submodules[0][0]
                 self.active.activate()
+                if isinstance(self.active, MQTTSubController):
+                    for t in self.submodules[0][1]:
+                        self.client.subscribe(t)
 
     def register(self, _instance: SubController):
         if isinstance(_instance, MQTTSubController):
             topics = _instance.get_topics()
             self.subscriptions.extend(topics)
             self.submodules.append((_instance, topics))
-            for t in topics:
-                self.client.subscribe(t)
         else:
             self.submodules.append((_instance, None))
         if not self.active:
             self.active_index = 0
             self.active = self.submodules[0][0]
+            for t in self.submodules[0][1]:
+                self.client.subscribe(t)
 
     def on_message(self, client, userdata, message):
         if isinstance(self.active, MQTTSubController):
@@ -105,7 +117,7 @@ class MQTTClientManager(nuimo.ControllerListener):
             self.active.on_swipe(direction)
         elif val >=8 and val <= 11: # TOUCH
             direction = Direction(val - 8)
-            self.active.on_touch(sirection)
+            self.active.on_touch(direction)
         elif val >= 12 and val <= 15: # LONGTOUCH
             direction = Direction(val - 12)
             if direction == Direction.LEFT:
@@ -121,16 +133,20 @@ class MQTTClientManager(nuimo.ControllerListener):
         for s in self.subscriptions:
             client.subscribe(s[0])
     
-    def publish(self, topic, payload):
+    def publish(self, topic, payload, retained=False):
         self.client.publish(topic, payload)
     
+    def disconnect_succeeded(self):
+        print("disconnected")
+        self.controller.connect()
+
     def connect_failed(self, error):
         print("Connected!")
 
 class MQTTSubController(SubController):
-    def __init__(self, controller, topics, manager):
+    def __init__(self,light_up_matrix, controller, topics, manager):
         self.topics = topics
-        super().__init__(controller, manager)
+        super().__init__(light_up_matrix, controller, manager)
     
     def get_topics(self):
         return self.topics
