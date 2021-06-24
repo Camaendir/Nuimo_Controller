@@ -7,13 +7,15 @@ from Controller import *
 from enum import Enum
 
 
+
+
+
 class SpotifyController(MQTTSubController):
-    def __init__(self, light_up_matrix, controller, manager,
-                 topics=["nuimo/spotify/status/get", "nuimo/spotify/volume/get"]):
+    def __init__(self, light_up_matrix, controller, manager, topics=["nuimo/spotify/status/get", "nuimo/spotify/volume/get"]):
         super().__init__(light_up_matrix, controller, topics, manager)
         self.value = 0
         self.publish("spotify/volume/need", "")
-
+    
     def on_message(self, topic, payload):
         if topic == "nuimo/spotify/status/get":
             self.update_matrix_status(payload == b"true")
@@ -35,10 +37,10 @@ class SpotifyController(MQTTSubController):
         self.value = max(0, self.value)
         self.send_matrix(get_matrix_from_number(int(self.value)), interval=1, fading=True)
         self.publish("spotify/volume/set", int(self.value))
-
+    
     def on_press(self):
         self.publish("spotify/play_state/set", "")
-
+    
     def on_swipe(self, direction):
         if direction == direction.LEFT:
             self.publish("spotify/song/previous", "")
@@ -58,7 +60,7 @@ class LumibaerController(MQTTSubController):
     def __init__(self, controller, manager, topics=["room/lumibaer/brightness"]):
         super().__init__(None, controller, topics, manager)
         self.value = 0
-
+    
     def on_message(self, topic, payload):
         if topic == "room/lumibaer/brightness":
             self.value = int((payload.decode()))
@@ -70,7 +72,7 @@ class LumibaerController(MQTTSubController):
         self.send_matrix(get_matrix_from_number(int(self.value)), interval=1, fading=True)
         self.publish("room/lumibaer/brightness/debounce", int(self.value))
 
-    def activate(self):
+    def indicate(self):
         self.light_animation()
 
     def light_animation(self):
@@ -84,7 +86,6 @@ class LumibaerController(MQTTSubController):
 class HallSignController(MQTTSubController):
     def __init__(self, light_up_matrix, controller, manager, topics=["hall/sign/brightness"]):
         super().__init__(light_up_matrix, controller, topics, manager)
-        self.value = 0
 
     def on_message(self, topic, payload):
         if topic == "hall/sign/brightness":
