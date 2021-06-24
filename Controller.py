@@ -136,7 +136,6 @@ class MQTTClientManager(nuimo.ControllerListener):
                 self.already_pressed = 0
                 self.active.on_multiple_press(self.already_pressed)
 
-
     def received_gesture_event(self, event):
         if not self.active:
             return
@@ -189,8 +188,17 @@ class MQTTClientManager(nuimo.ControllerListener):
         print("disconnected")
         self.controller.connect()
 
+    def started_connecting(self):
+        print("started connecting")
+
+    def connect_succeeded(self):
+        print("connect succeded")
+
     def connect_failed(self, error):
-        print("Connected!")
+        print("connect failed", error)
+
+    def started_disconnecting(self):
+        print("started disconnecting")
 
 class MQTTSubController(SubController):
     def __init__(self, light_up_matrix, controller, topics, manager):
