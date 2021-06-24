@@ -200,6 +200,8 @@ class MQTTClientManager(nuimo.ControllerListener):
     def connect_failed(self, error):
         if str(error) == "Nuimo GATT service missing":
             print("Connected")
+            if self.active:
+                self.active.indicate()
         else:
             print("connect failed", error)
 
