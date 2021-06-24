@@ -3,6 +3,7 @@ WITHMQTT = True
 from enum import Enum
 from threading import Timer
 import nuimo
+from nuimo import LedMatrix
 from matrices import *
 from time import sleep
 
@@ -18,12 +19,12 @@ class Direction(Enum):
     BOTTOM = 3
 
 class SubController:
-    def __init__(self, light_up_matrix, controller, manager, enable_double_press=False):
+    def __init__(self, light_up_matrix, controller, manager, enable_multiple_press=False):
         self.active = False
         self.controller = controller
         self.manager = manager
         self.light_up_matrix = light_up_matrix
-        self.enable_multiple_press = enable_double_press
+        self.enable_multiple_press = enable_multiple_press
         self.manager.register(self)
 
     def activate(self):
@@ -36,7 +37,7 @@ class SubController:
         self.active = False
     
     def send_matrix(self, matrix, interval=2.0, fading=True):
-        self.controller.display_matrix(matrix, interval=interval, fading=fading)
+        self.controller.display_matrix(LedMatrix(matrix), interval=interval, fading=fading)
 
     def on_rotate(self, value):
         pass
@@ -187,25 +188,28 @@ class MQTTClientManager(nuimo.ControllerListener):
             self.client.publish(topic, payload, retain=retained)
 
     def disconnect_succeeded(self):
-        print("disconnected")
+        print("Disconnected!\nTrying to reconnect")
         self.reconnect_client()
 
     def started_connecting(self):
-        print("started connecting")
+        print("Connecting...")
 
     def connect_succeeded(self):
         print("connect succeded")
 
     def connect_failed(self, error):
-        print("connect failed", error)
+        if str(error) == "Nuimo GATT service missing":
+            print("Connected")
+        else:
+            print("connect failed", error)
 
     def started_disconnecting(self):
         print("started disconnecting")
 
 class MQTTSubController(SubController):
-    def __init__(self, light_up_matrix, controller, topics, manager):
+    def __init__(self, light_up_matrix, controller, topics, manager, enable_multiple_press=False):
         self.topics = topics
-        super().__init__(light_up_matrix, controller, manager)
+        super().__init__(light_up_matrix, controller, manager, enable_multiple_press=enable_multiple_press)
     
     def get_topics(self):
         return self.topics
@@ -215,7 +219,6 @@ class MQTTSubController(SubController):
 
     def publish(self, topic, message):
         self.manager.publish(topic, message)
-
 
 class SpotifyController(MQTTSubController):
     def __init__(self, light_up_matrix, controller, manager,
@@ -263,12 +266,11 @@ class SpotifyController(MQTTSubController):
             self.publish("spotify/play/endomorphismus", "")
             self.send_matrix(heart_matrix)
 
-
 class LightController(MQTTSubController):
-    def __init__(self, indication_number, topic_prefix, controller, manager, additional_topic=None):
+    def __init__(self, indication_number, topic_prefix, controller, manager, additional_topic=None, base_matrix=lightbulb_matrix):
         self.on_topic = topic_prefix + "/on"
         self.topic_prefix = topic_prefix
-        super().__init__(get_indicates_matrix(lightbulb_symbol, indication_number), controller,
+        super().__init__(get_indicates_matrix(base_matrix, indication_number), controller,
                          [self.on_topic] + additional_topic, manager)
         self.on = False
 
@@ -295,11 +297,10 @@ class LightController(MQTTSubController):
         if topic == self.on_topic:
             self.on = (payload.decode() == "1")
 
-
 class BrightnessLightController(LightController):
-    def __init__(self, indication_number, topic_prefix, controller, manager, additional_topics=None):
+    def __init__(self, indication_number, topic_prefix, controller, manager, additional_topics=None, base_matrix=lightbulb_matrix):
         self.brightness_topic = topic_prefix + "/brightness"
-        super().__init__(indication_number, topic_prefix, controller, manager, [self.brightness_topic])
+        super().__init__(indication_number, topic_prefix, controller, manager, [self.brightness_topic], base_matrix=base_matrix)
         self.value = 0
 
     def on_message(self, topic, payload):
@@ -315,3 +316,10 @@ class BrightnessLightController(LightController):
         self.send_matrix(get_matrix_from_number(int(self.value)), interval=1, fading=True)
         self.publish(self.brightness_topic + "/debounce", int(self.value))
 
+class MatrixDisplayController(MQTTSubController):
+
+    def __init__(self, light_up_matrix, controller, topic, manager, enable_multiple_press=False):
+        super().__init__(light_up_matrix, controller, (topic,), manager, enable_multiple_press=enable_multiple_press)
+
+    def on_message(self, topic, payload):
+        self.send_matrix(payload.decode(), interval=5)

@@ -1,4 +1,3 @@
-from nuimo import LedMatrix
 from copy import deepcopy
 
 
@@ -9,7 +8,7 @@ def wrap(input):
     return output
 
 
-play_matrix = LedMatrix(
+play_matrix = (
     "".join(
         [
             "         ",
@@ -24,12 +23,72 @@ play_matrix = LedMatrix(
         ]
     ))
 
-pause_matrix = LedMatrix(
+star_matrix  = "    *    "
+star_matrix += "   + +   "
+star_matrix += "+++   +++"
+star_matrix += "+       +"
+star_matrix += " +     + "
+star_matrix += "  +   +  "
+star_matrix += " +  +  + "
+star_matrix += "+  + +  +"
+star_matrix += "+++   +++"
+
+wave_matrix   = "         "
+wave_matrix  += "  ++     "
+wave_matrix  += " +  +    "
+wave_matrix  += "+ ++ +  +"
+wave_matrix  += " +  + ++ "
+wave_matrix  += "+ ++ +  +"
+wave_matrix  += " +  + ++ "
+wave_matrix  += "+    +  +"
+wave_matrix  += "      ++ "
+
+ying_matrix  = "  **+**  "
+ying_matrix += " +**+**+ "
+ying_matrix += "++++ ++++"
+ying_matrix += "+++++++ +"
+ying_matrix += "++++++  +"
+ying_matrix += "+++     +"
+ying_matrix += "++  +   +"
+ying_matrix += " ++    + "
+ying_matrix += "  +++++  "
+
+leaf_matrix = "   ***   "
+leaf_matrix += "  *   *  "
+leaf_matrix += " *     * "
+leaf_matrix += "+   +   +"
+leaf_matrix += "+ + + + +"
+leaf_matrix += "+  +++  +"
+leaf_matrix += " +  +  + "
+leaf_matrix += "  +++++  "
+leaf_matrix += "    +    "
+
+fire_matrix  = "     *   "
+fire_matrix += "  * **   "
+fire_matrix += "  ** *   "
+fire_matrix += "  *  * * "
+fire_matrix += "  *   ** "
+fire_matrix += "* *    * "
+fire_matrix += "**      *"
+fire_matrix += "*       *"
+fire_matrix += "*       *"
+
+snake_matrix  = "  +      "
+snake_matrix += "  +      "
+snake_matrix += "  +      "
+snake_matrix += "  ++++   "
+snake_matrix += "     +   "
+snake_matrix += "     +   "
+snake_matrix += "         "
+snake_matrix += "         "
+snake_matrix += "     +   "
+
+pause_matrix = (
     "".join(
         [" " * 9] + ["  ** **  " for _ in range(7)] + [" " * 9]
     ))
 
-lightbulb_symbol_2 = "".join([
+lightbulb_matrix_2 = "".join([
             "   ***   ",
             "  *   *  ",
             " *     * ",
@@ -41,7 +100,7 @@ lightbulb_symbol_2 = "".join([
             "   ***   "
         ])
 
-lightbulb_symbol = "".join([
+lightbulb_matrix = "".join([
             "   ***   ",
             "  *   *  ",
             "  *   *  ",
@@ -53,7 +112,7 @@ lightbulb_symbol = "".join([
             "         "
         ])
 
-next_symbol = "".join(
+next_matrix = "".join(
     [
         "         ",
         "  *   *  ",
@@ -67,13 +126,9 @@ next_symbol = "".join(
     ]
 )
 
-next_matrix = LedMatrix(
-    next_symbol)
+last_matrix = next_matrix[::-1]
 
-last_matrix = LedMatrix(
-    next_symbol[::-1])
-
-music_matrix = LedMatrix(
+music_matrix = (
     "".join([
         "  *****  ",
         "  *****  ",
@@ -86,7 +141,19 @@ music_matrix = LedMatrix(
         "         "
     ]))
 
-light_matrix = LedMatrix(
+matrix_matrix = ("".join([
+    "         ",
+    " ******* ",
+    " *     * ",
+    " *     * ",
+    " *     * ",
+    " *     * ",
+    " *     * ",
+    " ******* ",
+    "         ",
+]))
+
+light_matrix = (
     "".join([
         "    *    ",
         " *     * ",
@@ -99,7 +166,7 @@ light_matrix = LedMatrix(
         "    *    "
     ]))
 
-light_matrix_2 = LedMatrix(
+light_matrix_2 = (
     "".join([
         "         ",
         "    *    ",
@@ -112,7 +179,7 @@ light_matrix_2 = LedMatrix(
         "         "
     ]))
 
-light_matrix_3 = LedMatrix(
+light_matrix_3 = (
     "".join([
         "         ",
         "         ",
@@ -247,9 +314,7 @@ numbers = (
     ])
 )
 
-numbers_matrix = [LedMatrix(n) for n in deepcopy(numbers)]
-
-one_hundred = LedMatrix("".join([
+one_hundred = ("".join([
     "         ",
     "         ",
     "* *** ***",
@@ -261,7 +326,7 @@ one_hundred = LedMatrix("".join([
     "         ",
 ]))
 
-loudspeaker_matrix = LedMatrix(
+loudspeaker_matrix = (
     "".join([
         " ******* ",
         " *     * ",
@@ -274,7 +339,7 @@ loudspeaker_matrix = LedMatrix(
         " ******* "
     ]))
 
-heart_matrix = LedMatrix(
+heart_matrix = (
     "".join([
         "         ",
         "  ** **  ",
@@ -287,7 +352,7 @@ heart_matrix = LedMatrix(
         "         "
     ]))
 
-sign_matrix = LedMatrix(
+sign_matrix = (
     "".join([
         "    +    ",
         "   + +   ",
@@ -326,11 +391,11 @@ def get_matrix_from_number(number):
         return one_hundred
     one_er = number % 10
     ten_er = number // 10
-    return LedMatrix(add_matrices(numbers[ten_er], shift_matrix(numbers[one_er], 5)))
+    return (add_matrices(numbers[ten_er], shift_matrix(numbers[one_er], 5)))
 
 def get_indicates_matrix(matrix, number):
     number_matrix = "".join([" "*8 + "*" for _ in range(number)] + [" "*9 for _ in range(9-number) ])
-    return LedMatrix(add_matrices(matrix, number_matrix))
+    return (add_matrices(matrix, number_matrix))
 
 def print_matrix_lines(lines):
     for l in lines:
