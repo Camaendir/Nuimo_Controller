@@ -61,13 +61,14 @@ class MQTTClientManager(nuimo.ControllerListener):
 
     def __init__(self, controller):
         self.controller = controller
-        self.client = mqtt.Client("Nuimo")
         self.subscriptions = []
-        self.client.on_message = self.on_message
-        self.client.on_disconnect = self.reconnect_client
-        self.client.on_connect = self.on_connect
-        self.client.connect("localhost")
-        self.client.loop_start()
+        if WITHMQTT:
+            self.client = mqtt.Client("Nuimo")
+            self.client.on_message = self.on_message
+            self.client.on_disconnect = self.reconnect_client
+            self.client.on_connect = self.on_connect
+            self.client.connect("localhost")
+            self.client.loop_start()
 
         self.active: SubController = None
         self.active_index = -1
@@ -79,7 +80,7 @@ class MQTTClientManager(nuimo.ControllerListener):
     def change_active(self, increase_by=1):
         if self.active:
             self.active.deactivate()
-            if isinstance(self.active, MQTTSubController):
+            if isinstance(self.active, MQTTSubController) and WITHMQTT:
                 for t in self.submodules[self.active_index][1]:
                     self.client.unsubscribe(t)
             self.active_index += increase_by
