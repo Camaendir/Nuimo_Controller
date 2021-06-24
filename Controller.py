@@ -119,8 +119,8 @@ class MQTTClientManager(nuimo.ControllerListener):
 
     def on_message(self, client, userdata, message):
         if isinstance(self.active, MQTTSubController):
-            if message.topic in self.submodules[self.active_index][1]:
-                self.active.on_message(message.topic, message.payload)
+            if message.on_topic in self.submodules[self.active_index][1]:
+                self.active.on_message(message.on_topic, message.payload)
 
     def reconnect_client(self, client, userdata, rc):
         client.connect("localhost")
@@ -182,7 +182,7 @@ class MQTTClientManager(nuimo.ControllerListener):
     
     def publish(self, topic, payload, retained=False):
         if WITHMQTT:
-            self.client.publish(topic, payload)
+            self.client.publish(topic, payload, retain=retained)
 
     def disconnect_succeeded(self):
         print("disconnected")

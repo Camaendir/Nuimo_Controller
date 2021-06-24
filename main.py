@@ -11,7 +11,7 @@ from enum import Enum
 
 
 class SpotifyController(MQTTSubController):
-    def __init__(self, light_up_matrix, controller, manager, topics=["nuimo/spotify/status/get", "nuimo/spotify/volume/get"]):
+    def __init__(self, light_up_matrix, controller, manager, topics=("nuimo/spotify/status/get", "nuimo/spotify/volume/get")):
         super().__init__(light_up_matrix, controller, topics, manager)
         self.value = 0
         self.publish("spotify/volume/need", "")
@@ -56,50 +56,56 @@ class SpotifyController(MQTTSubController):
             self.send_matrix(heart_matrix)
 
 
-class LumibaerController(MQTTSubController):
-    def __init__(self, controller, manager, topics=["room/lumibaer/brightness"]):
-        super().__init__(None, controller, topics, manager)
-        self.value = 0
-    
-    def on_message(self, topic, payload):
-        if topic == "room/lumibaer/brightness":
-            self.value = int((payload.decode()))
+class LightController(MQTTSubController):
+    def __init__(self, indication_number, topic_prefix, controller, manager, additional_topic=None):
+        self.on_topic = topic_prefix + "/on"
+        self.topic_prefix = topic_prefix
+        super().__init__(get_indicates_matrix(lightbulb_symbol, indication_number), controller, [self.on_topic] + additional_topic, manager)
+        self.on = False
 
-    def on_rotate(self, value):
-        self.value += value / 300
-        self.value = min(100, self.value)
-        self.value = max(0, self.value)
-        self.send_matrix(get_matrix_from_number(int(self.value)), interval=1, fading=True)
-        self.publish("room/lumibaer/brightness/debounce", int(self.value))
-
-    def indicate(self):
-        self.light_animation()
-
-    def light_animation(self):
-        for _ in range(2):
+    def light_animation(self, reverse=False):
+        if reverse:
+            self.send_matrix(light_matrix_3, interval=1.1)
+            sleep(1)
+            self.send_matrix(light_matrix_2, interval=1.1)
+            sleep(1)
+            self.send_matrix(light_matrix, interval=1.1)
+        else:
             self.send_matrix(light_matrix, interval=1.1)
             sleep(1)
             self.send_matrix(light_matrix_2, interval=1.1)
             sleep(1)
+            self.send_matrix(light_matrix_3, interval=1.1)
 
-
-class HallSignController(MQTTSubController):
-    def __init__(self, light_up_matrix, controller, manager, topics=["hall/sign/brightness"]):
-        super().__init__(light_up_matrix, controller, topics, manager)
+    def on_press(self):
+        self.on = not self.on
+        self.publish(self.on_topic, "0" if self.on else "1")
+        self.light_animation(reverse=not self.on)
 
     def on_message(self, topic, payload):
-        if topic == "hall/sign/brightness":
-            self.value = int((payload.decode()))
+        if topic == self.on_topic:
+            self.on = (payload.decode() == "1")
+
+
+class BrightnessLightController(LightController):
+    def __init__(self, indication_number, topic_prefix, controller, manager, additional_topics=None):
+        self.brightness_topic = topic_prefix + "/brightness"
+        super().__init__(indication_number, topic_prefix, controller, manager, [self.brightness_topic])
+        self.value = 0
+
+    def on_message(self, topic, payload):
+        if topic == self.brightness_topic:
+            self.value = int(payload.decode())
+        else:
+            super().on_message(topic, payload)
 
     def on_rotate(self, value):
         self.value += value / 300
         self.value = min(100, self.value)
         self.value = max(0, self.value)
         self.send_matrix(get_matrix_from_number(int(self.value)), interval=1, fading=True)
-        self.publish("hall/sign/brightness/debounce", int(self.value))
+        self.publish(self.brightness_topic + "/debounce", int(self.value))
 
-    def on_multiple_press(self, value):
-        self.send_matrix(get_matrix_from_number(int(value)))
 
 mac_use = 0
 macs = ("dc:1c:77:d0:9a:d9", "CB:DB:5D:3E:34:6E")
@@ -110,8 +116,8 @@ man = MQTTClientManager(controller)
 controller.listener = man
 
 SpotifyController(music_matrix, controller, man)
-LumibaerController(controller, man)
-HallSignController(lightbulb_matrix, controller, man)
+BrightnessLightController(1, "hall/sign", controller, man)
+BrightnessLightController(2, "room/lumibaer", controller, man)
 
 print("connecting ...")
 controller.connect()
