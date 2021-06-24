@@ -64,7 +64,7 @@ class LightController(MQTTSubController):
         self.on = False
 
     def light_animation(self, reverse=False):
-        if reverse:
+        if not reverse:
             self.send_matrix(light_matrix_3, interval=1.1)
             sleep(1)
             self.send_matrix(light_matrix_2, interval=1.1)
@@ -116,8 +116,8 @@ man = MQTTClientManager(controller)
 controller.listener = man
 
 SpotifyController(music_matrix, controller, man)
-BrightnessLightController(1, "hall/sign", controller, man)
-BrightnessLightController(2, "room/lumibaer", controller, man)
+BrightnessLightController(2, "hall/sign", controller, man)
+BrightnessLightController(1, "room/lumibaer", controller, man)
 
 print("connecting ...")
 controller.connect()
