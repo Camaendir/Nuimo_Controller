@@ -247,7 +247,8 @@ class SpotifyController(MQTTSubController):
         self.publish("spotify/volume/set", int(self.value))
 
     def on_press(self):
-        self.publish("spotify/play_state/set", "")
+        print("i am here")
+        self.publish("spotify/play_state/set", "hello??")
 
     def on_swipe(self, direction):
         if direction == direction.LEFT:
