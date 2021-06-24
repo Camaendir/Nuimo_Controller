@@ -2,7 +2,6 @@ import nuimo
 import threading
 from Controller import *
 
-
 mac_use = 0
 macs = ("dc:1c:77:d0:9a:d9", "CB:DB:5D:3E:34:6E")
 manager = nuimo.ControllerManager(adapter_name='hci0')

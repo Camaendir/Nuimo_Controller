@@ -18,7 +18,7 @@ class Direction(Enum):
     BOTTOM = 3
 
 class SubController:
-    def __init__(self, light_up_matrix, controller, manager, enable_double_press=True):
+    def __init__(self, light_up_matrix, controller, manager, enable_double_press=False):
         self.active = False
         self.controller = controller
         self.manager = manager
@@ -188,7 +188,7 @@ class MQTTClientManager(nuimo.ControllerListener):
 
     def disconnect_succeeded(self):
         print("disconnected")
-        self.controller.connect()
+        self.reconnect_client()
 
     def started_connecting(self):
         print("started connecting")
@@ -226,7 +226,7 @@ class SpotifyController(MQTTSubController):
 
     def on_message(self, topic, payload):
         if topic == "nuimo/spotify/status/get":
-            self.update_matrix_status(payload == b"true")
+            self.update_matrix_status(payload != b"true")
         elif topic == "nuimo/spotify/volume/get":
             self.value = int(payload)
 
@@ -247,8 +247,7 @@ class SpotifyController(MQTTSubController):
         self.publish("spotify/volume/set", int(self.value))
 
     def on_press(self):
-        print("i am here")
-        self.publish("spotify/play_state/set", "hello??")
+        self.publish("spotify/play_state/set", "")
 
     def on_swipe(self, direction):
         if direction == direction.LEFT:
@@ -289,7 +288,7 @@ class LightController(MQTTSubController):
 
     def on_press(self):
         self.on = not self.on
-        self.publish(self.on_topic, "0" if self.on else "1")
+        self.publish(self.on_topic, "1" if self.on else "0")
         self.light_animation(reverse=not self.on)
 
     def on_message(self, topic, payload):
