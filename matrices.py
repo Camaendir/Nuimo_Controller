@@ -63,6 +63,67 @@ leaf_matrix += " +  +  + "
 leaf_matrix += "  +++++  "
 leaf_matrix += "    +    "
 
+stop_matrix = "  +++++  "
+stop_matrix += " ++    + "
+stop_matrix += "++++    +"
+stop_matrix += "+ +++   +"
+stop_matrix += "+  +++  +"
+stop_matrix += "+   +++ +"
+stop_matrix += "+    ++++"
+stop_matrix += " +    ++ "
+stop_matrix += "  +++++  "
+
+check_matrix = "         "
+check_matrix += "        +"
+check_matrix += "       + "
+check_matrix += "      +  "
+check_matrix += " +   +   "
+check_matrix += "  + +    "
+check_matrix += "   +     "
+check_matrix += "         "
+check_matrix += "         "
+
+x_matrix = "         "
+x_matrix += " +     + "
+x_matrix += "  +   +  "
+x_matrix += "   + +   "
+x_matrix += "    +    "
+x_matrix += "   + +   "
+x_matrix += "  +   +  "
+x_matrix += " +     + "
+x_matrix += "         "
+x_matrix += "         "
+
+arrow_matrix = "         "
+arrow_matrix += "   +     "
+arrow_matrix += "  ++     "
+arrow_matrix += " +++++   "
+arrow_matrix += "  +++++  "
+arrow_matrix += "   +  ++ "
+arrow_matrix += "       + "
+arrow_matrix += "         "
+arrow_matrix += "         "
+
+mood_matrix = "  *****  "
+mood_matrix += " +     + "
+mood_matrix += "+       +"
+mood_matrix += "+  + +  +"
+mood_matrix += "+       +"
+mood_matrix += "+ +   + +"
+mood_matrix += "+  +++  +"
+mood_matrix += " +     + "
+mood_matrix += "  +++++  "
+
+water_matrix = "    *    "
+water_matrix += "   +*+   "
+water_matrix += "   ***   "
+water_matrix += "  *+***  "
+water_matrix += "  *+***  "
+water_matrix += " * +**** "
+water_matrix += " * ***** "
+water_matrix += " * ***** "
+water_matrix += "  *****  "
+
 fire_matrix  = "     *   "
 fire_matrix += "  * **   "
 fire_matrix += "  ** *   "
@@ -82,6 +143,18 @@ snake_matrix += "     +   "
 snake_matrix += "         "
 snake_matrix += "         "
 snake_matrix += "     +   "
+
+apple_matrix = """
+     *   
+    *    
+  *****  
+ ******* 
+ ******  
+ ******  
+ ******* 
+  *****  
+         
+""".replace("\n", "")
 
 pause_matrix = (
     "".join(

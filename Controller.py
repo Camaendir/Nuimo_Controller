@@ -231,7 +231,10 @@ class SpotifyController(MQTTSubController):
 
     def on_message(self, topic, payload):
         if topic == "nuimo/spotify/status/get":
-            self.update_matrix_status(payload != b"true")
+            if payload == b"":
+                self.send_matrix(stop_matrix, interval=3)
+            else:
+                self.update_matrix_status(payload != b"true")
         elif topic == "nuimo/spotify/volume/get":
             self.value = int(payload)
 
