@@ -121,8 +121,8 @@ class MQTTClientManager(nuimo.ControllerListener):
 
     def on_message(self, client, userdata, message):
         if isinstance(self.active, MQTTSubController):
-            if message.on_topic in self.submodules[self.active_index][1]:
-                self.active.on_message(message.on_topic, message.payload)
+            if message.topic in self.submodules[self.active_index][1]:
+                self.active.on_message(message.topic, message.payload)
 
     def reconnect_client(self, client, userdata, rc):
         client.connect("localhost")
