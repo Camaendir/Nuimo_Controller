@@ -7,7 +7,7 @@ from matrices import *
 
 class SpotifyController(SubController):
 
-    def __init__(self, light_up_matrix, controller, manager, enable_multiple_press=False):
+    def __init__(self,  controller, manager, light_up_matrix=music_matrix, enable_multiple_press=False):
         super().__init__(light_up_matrix, controller, manager, enable_multiple_press=enable_multiple_press)
         self.value = get_volume()
         self.timer = time()

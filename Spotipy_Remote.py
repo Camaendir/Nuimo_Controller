@@ -6,7 +6,7 @@ from env import spotify_client_id, spotify_client_secret, spotify_redirect_url
 scope = "user-read-playback-state,user-modify-playback-state,user-read-currently-playing,playlist-read-private"
 sp = spotipy.Spotify(client_credentials_manager=SpotifyOAuth(scope=scope, client_id=spotify_client_id,
                                                              client_secret=spotify_client_secret,
-                                                             redirect_uri=spotify_redirect_url))
+                                                             redirect_uri=spotify_redirect_url, open_browser=False))
 
 
 def transfer_to(id):
