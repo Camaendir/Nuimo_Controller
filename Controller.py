@@ -147,7 +147,7 @@ class MQTTClientManager(nuimo.ControllerListener):
         for s in self.subscriptions:
             client.subscribe(s[0])
 
-    def publish(self, topic, payload, retained=False):
+    def publish(self, topic, payload, retained=True):
         self.client.publish(topic, payload, retain=retained)
 
     def disconnect_succeeded(self):
