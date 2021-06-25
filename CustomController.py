@@ -4,7 +4,7 @@ from matrices import *
 
 class LumibaerController(BrightnessLightController):
 
-    def __init__(self, indication_number, topic_prefix, controller, manager, additional_topics=None,
+    def __init__(self, indication_number, topic_prefix, controller, manager, additional_topics=tuple(),
                  base_matrix=lightbulb_matrix):
         super().__init__(indication_number, topic_prefix, controller, manager, additional_topics=additional_topics,
                          base_matrix=base_matrix)
