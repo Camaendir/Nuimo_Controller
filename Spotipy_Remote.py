@@ -21,7 +21,11 @@ def get_volume():
 
 
 def set_volume(value):
-    sp.volume(value)
+    try:
+        sp.volume(value)
+        return True
+    except spotipy.SpotifyException as e:
+        return False
 
 
 def next_song():

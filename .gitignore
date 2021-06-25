@@ -2,3 +2,4 @@
 nohup.out
 /__pycache__/
 env.py
+.cache

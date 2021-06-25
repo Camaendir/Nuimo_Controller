@@ -7,9 +7,11 @@ from matrices import *
 
 class SpotifyController(SubController):
 
-    def __init__(self,  controller, manager, light_up_matrix=music_matrix, enable_multiple_press=False):
+    def __init__(self,  controller, manager, light_up_matrix=music_matrix, device_id="7a0dbf97d642f2b3138936c4286763ebe99fff9b", playlist_url="spotify:playlist:3NWvrg2ZiU43QoFc87brzl", enable_multiple_press=False):
         super().__init__(light_up_matrix, controller, manager, enable_multiple_press=enable_multiple_press)
         self.value = get_volume()
+        self.playlist_url = playlist_url
+        self.device_id = device_id
         self.timer = time()
 
     def on_rotate(self, value):
@@ -21,8 +23,11 @@ class SpotifyController(SubController):
         self.value += (sign * value)
         self.value = min(100, self.value)
         self.value = max(0, self.value)
-        self.send_matrix(get_matrix_from_number(int(self.value)), interval=1, fading=True)
-        set_volume(int(self.value))
+        success = set_volume(int(self.value))
+        if not success:
+            self.send_matrix(stop_matrix, interval=1)
+        else:
+            self.send_matrix(get_matrix_from_number(int(self.value)), interval=1, fading=True)
         self.timer = time()
 
     def on_press(self):
@@ -42,8 +47,8 @@ class SpotifyController(SubController):
             next_song()
             self.send_matrix(next_matrix)
         elif direction == direction.TOP:
-            transfer_to("7a0dbf97d642f2b3138936c4286763ebe99fff9b")
+            transfer_to(self.device_id)
             self.send_matrix(loudspeaker_matrix)
         elif direction == direction.BOTTOM:
-            play_song_current_or_new_device("spotify:playlist:3NWvrg2ZiU43QoFc87brzl", "7a0dbf97d642f2b3138936c4286763ebe99fff9b")
+            play_song_current_or_new_device(self.playlist_url, self.device_id)
             self.send_matrix(heart_matrix)
