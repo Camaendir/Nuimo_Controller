@@ -1,2 +1,3 @@
 nuimo
 paho-mqtt
+spotipy

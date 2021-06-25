@@ -1,6 +1,7 @@
 import nuimo
 import threading
 from Controller import *
+from SpotifyController import SpotifyController
 
 mac_use = 0
 macs = ("dc:1c:77:d0:9a:d9", "CB:DB:5D:3E:34:6E")
@@ -11,11 +12,12 @@ man = MQTTClientManager(controller)
 controller.listener = man
 
 
-
 class LumibaerController(BrightnessLightController):
 
-    def __init__(self, indication_number, topic_prefix, controller, manager, additional_topics=None, base_matrix=lightbulb_matrix):
-        super().__init__(indication_number, topic_prefix, controller, manager, additional_topics=additional_topics, base_matrix=base_matrix)
+    def __init__(self, indication_number, topic_prefix, controller, manager, additional_topics=None,
+                 base_matrix=lightbulb_matrix):
+        super().__init__(indication_number, topic_prefix, controller, manager, additional_topics=additional_topics,
+                         base_matrix=base_matrix)
         self.colors = [wave_matrix, fire_matrix, ying_matrix, leaf_matrix]
         self.color_status = 0
 
@@ -34,6 +36,7 @@ class LumibaerController(BrightnessLightController):
             self.color_status = (self.color_status - 1) % len(self.colors)
             self.publish("room/lumibaer/color/set", self.color_status)
             self.send_matrix(self.colors[self.color_status])
+
 
 class SignController(BrightnessLightController):
 
