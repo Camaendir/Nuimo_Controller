@@ -47,6 +47,7 @@ class SignController(BrightnessLightController):
         else:
             super().on_swipe(direction)
 
+
 SpotifyController(music_matrix, controller, man)
 SignController(0, "hall/sign", controller, man, base_matrix=sign_matrix)
 LumibaerController(1, "room/lumibaer", controller, man)
