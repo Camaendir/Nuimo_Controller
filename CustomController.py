@@ -43,7 +43,7 @@ class SignController(BrightnessLightController):
 
 class MatrixDisplayController(MQTTSubController):
 
-    def __init__(self, light_up_matrix, controller, topic, manager, enable_multiple_press=False):
+    def __init__(self, light_up_matrix, controller, manager, topic, enable_multiple_press=False):
         super().__init__(light_up_matrix, controller, (topic,), manager, enable_multiple_press=enable_multiple_press)
 
     def on_message(self, topic, payload):
