@@ -57,7 +57,7 @@ def play_song(context_url, device_id=None, random=False):
     if not random:
         sp.start_playback(context_uri=context_url, device_id=device_id)
     else:
-        sp.start_playback(context_uri=context_url, device_id=device_id, offset=randint(0, 30)) # Random
+        sp.start_playback(context_uri=context_url, device_id=device_id, offset={"position": randint(0, 30)}) # Random
 
 
 def play_song_current_or_new_device(context_url, device_id, random=True):
