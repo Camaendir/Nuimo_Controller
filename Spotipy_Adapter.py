@@ -1,6 +1,5 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from time import sleep
 from env import spotify_client_id, spotify_client_secret, spotify_redirect_url
 from random import randint
 

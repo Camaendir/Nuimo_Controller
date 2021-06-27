@@ -1,7 +1,7 @@
-from SpotifyController import SpotifyController
-from NuimoManager import start_manager
+from version0.SpotifyController import SpotifyController
+from version0.NuimoManager import start_manager
 from matrices import sign_matrix, matrix_matrix
-from CustomController import SignController, LumibaerController,MatrixDisplayController
+from version0.CustomController import SignController, LumibaerController,MatrixDisplayController
 
 mac = "dc:1c:77:d0:9a:d9"
 
