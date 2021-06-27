@@ -48,18 +48,26 @@ class SubController(nuimo.ControllerListener):
 
     def change_active(self, increase_by=1):
         if self.active:
-            self.active.deactivate()
+            self.active.deactivate(self.device)
             self.active_index += increase_by
             self.active_index %= len(self.remotes)
-            self.active = self.remotes[self.active_index][0]
-            self.active.activate()
-            self.active.indicate()
+            self.active = self.remotes[self.active_index]
+            self.active.activate(self.device)
+            self.active.indicate(self.device)
         else:
             if self.remotes:
                 self.active_index = 0
-                self.active = self.remotes[0][0]
-                self.active.activate()
-                self.active.indicate()
+                self.active = self.remotes[0]
+                self.active.activate(self.device)
+                self.active.indicate(self.device)
+
+    def register_remote(self, remote):
+        self.remotes.append(remote)
+        if not self.active:
+            self.active_index = 0
+            self.active = self.remotes[0]
+            self.active.activate(self.device)
+            self.active.indicate(self.device)
 
     def check_press(self, press_number):
         if self.already_pressed == press_number:
@@ -140,20 +148,17 @@ class SubController(nuimo.ControllerListener):
 
 
 class Device:
-    def __init__(self, device_manager: DeviceManager, mac, name):
+    def __init__(self, device_manager, mac, name):
         self.controller = nuimo.Controller(mac_address=mac, manager=device_manager.manager)
-        self.controller.listener = SubController(self)
+        self.subController = SubController(self)
+        self.controller.listener = self.subController
         self.name = name
         self.mac = mac
         self.device_manager = device_manager
-        self.active_remote = None
-        self.remotes = []
         self.device_manager.register_device(self)
 
     def _register(self, remote):
-        if not self.active_remote:
-            self.active_remote = remote
-        self.remotes.append(remote)
+        self.subController.register_remote(remote)
 
     def register_remotes(self, remotes):
         if isinstance(remotes, Iterable):
@@ -203,7 +208,7 @@ class Remote:
     def indicate(self, device: Device):
         device.send_matrix(self.light_up_matrix, interval=4)
 
-    def deactivate(self):
+    def deactivate(self, device: Device):
         self.active = False
 
     def on_rotate(self, value, device: Device):

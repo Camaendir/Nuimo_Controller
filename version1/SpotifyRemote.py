@@ -1,6 +1,6 @@
 from time import time
 
-from DeviceManager import Remote, Device
+from .DeviceManager import Remote, Device
 from Spotipy_Adapter import *
 from matrices import *
 

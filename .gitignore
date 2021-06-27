@@ -1,5 +1,6 @@
 /venv/
 nohup.out
+version1/__pycache__/
 /__pycache__/
 env.py
 .cache

@@ -1,5 +1,5 @@
 from matrices import *
-from DeviceManager import Remote, Device, DeviceManager, Direction
+from .DeviceManager import Remote, Device, DeviceManager, Direction
 from time import sleep
 
 
