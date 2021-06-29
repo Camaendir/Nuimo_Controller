@@ -16,7 +16,11 @@ class SpotifyRemote(Remote):
 
     def on_rotate(self, value, device: Device):
         if time() - self.timer > 5:
-            self.value = get_volume()
+            v = get_volume()
+            if not v:
+                device.send_matrix(stop_matrix, interval=1)
+                return
+            self.value = v
         sign = -1 if value < 0 else 1
         value = abs(value)
         value = pow(value, 1.6) * 0.00015

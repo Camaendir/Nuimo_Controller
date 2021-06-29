@@ -2,3 +2,4 @@ nuimo
 paho-mqtt
 spotipy
 phue
+requests

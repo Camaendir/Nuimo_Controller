@@ -16,7 +16,7 @@ def transfer_to(id):
 def get_volume():
     cp = sp.current_playback()
     if cp is None:
-        return 0
+        return False
     return cp["device"]["volume_percent"]
 
 

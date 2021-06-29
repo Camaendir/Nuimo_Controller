@@ -1,6 +1,7 @@
-from version1.DeviceManager import *
-from version1.SpotifyRemote import SpotifyRemote
-from version1.MQTTLightRemote import SignRemote, LumibaerRemote
+from Lib.DeviceManager import *
+from Lib.SpotifyRemote import SpotifyRemote
+from Lib.MQTTLightRemote import SignRemote
+from Lib.HTTPLightRemote import LumibaerRemote
 
 mac1 = "dc:1c:77:d0:9a:d9"
 mac2 = "f1:06:78:1e:34:4e"
@@ -11,7 +12,7 @@ device1 = Device(manager, mac1, "Table - Black")
 device2 = Device(manager, mac2, "Desk - White")
 
 spotify = SpotifyRemote()
-lumibaer = LumibaerRemote(1, "room/lumibaer", manager)
+lumibaer = LumibaerRemote(1, "192.168.178.32")
 sign = SignRemote(0, "hall/sign", manager)
 
 

@@ -461,7 +461,7 @@ def shift_matrix(matrix, shift):
 
 def get_matrix_from_number(number):
     if number >= 100:
-        return one_hundred
+        number = 99
     one_er = number % 10
     ten_er = number // 10
     return (add_matrices(numbers[ten_er], shift_matrix(numbers[one_er], 5)))
