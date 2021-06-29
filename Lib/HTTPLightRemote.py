@@ -8,8 +8,8 @@ class LightRemote(Remote):
     def __init__(self, indication_number, http_ip, base_matrix=lightbulb_matrix, enable_multiple_press=False):
         super().__init__(get_indicates_matrix(base_matrix, indication_number),
                          enable_multiple_press=enable_multiple_press)
-        self.on = self.get_http("/on").lower() == "true"
         self.http_ip = http_ip
+        self.on = self.get_http("/on").lower() == "true"
         self.data_timer_on = time()
 
     def light_animation(self, device: Device, reverse=False):
