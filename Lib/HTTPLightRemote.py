@@ -36,7 +36,7 @@ class LightRemote(Remote):
         if time() - self.data_timer_on > 5:
             self.on = self.get_http("/on") == "true"
         self.on = not self.on
-        self.send_http("/on", "true")
+        self.send_http("/on", "true" if self.on else "false")
         self.light_animation(device, reverse=not self.on)
         self.data_timer_on = time()
 
@@ -44,12 +44,12 @@ class LightRemote(Remote):
 class BrightnessLightRemote(LightRemote):
     def __init__(self, indication_number, http_ip, base_matrix=lightbulb_matrix, enable_multiple_press=False):
         super().__init__(indication_number, http_ip, base_matrix, enable_multiple_press=enable_multiple_press)
-        self.value = float(int(self.get_http("/bri")))
+        self.value = float(self.get_http("/bri"))
         self.data_timer_bri = time()
 
     def on_rotate(self, value, device: Device):
         if time() - self.data_timer_bri > 5:
-            self.value = int(self.get_http("/bri"))
+            self.value = float(self.get_http("/bri"))
         self.value += self.slow_acceleration_curve(value)
         self.value = min(100, self.value)
         self.value = max(0, self.value)

@@ -1,7 +1,7 @@
 from matrices import *
 from .DeviceManager import Remote, Device, DeviceManager, Direction
 from time import sleep
-
+import json
 
 class LightRemote(Remote):
     def __init__(self, indication_number, topic_prefix, device_manager: DeviceManager,
@@ -34,6 +34,41 @@ class LightRemote(Remote):
 
     def mqtt_on_message(self, payload):
         self.on = (payload.decode() == "1")
+
+
+class JSONLightRemote(Remote):
+    def __init__(self, indication_number, pub_topic, sub_topic,  device_manager, json_key = "state", json_values = ("OFF", "ON"),  base_matrix=lightbulb_matrix, enable_multiple_press=False):
+        super().__init__(get_indicates_matrix(base_matrix, indication_number), enable_multiple_press=enable_multiple_press)
+        self.pub_topic = pub_topic
+        self.on = False
+        self.mqtt = device_manager.get_mqtt_manager()
+        self.mqtt.register_subscription(sub_topic, self.mqtt_on_message)
+        self.json_key = json_key
+        self.json_values = json_values
+
+    def light_animation(self, device: Device, reverse=False):
+        if not reverse:
+            device.send_matrix(light_matrix_3, interval=1.1)
+            sleep(1)
+            device.send_matrix(light_matrix_2, interval=1.1)
+            sleep(1)
+            device.send_matrix(light_matrix, interval=1.1)
+        else:
+            device.send_matrix(light_matrix, interval=1.1)
+            sleep(1)
+            device.send_matrix(light_matrix_2, interval=1.1)
+            sleep(1)
+            device.send_matrix(light_matrix_3, interval=1.1)
+
+    def on_press(self, device: Device):
+        self.on = not self.on
+        self.mqtt.publish(self.pub_topic, json.dumps({self.json_key: self.json_values[int(self.on)]}))
+        self.light_animation(device, reverse=not self.on)
+
+    def mqtt_on_message(self, paylaod):
+        data = json.loads(paylaod.decode())
+        if self.json_key in data:
+            self.on = data[self.json_key] == self.json_values[1]
 
 
 class BrightnessLightRemote(LightRemote):

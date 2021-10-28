@@ -42,7 +42,7 @@ class SubController(nuimo.ControllerListener):
         self.active: Remote = None
         self.active_index = -1
         self.remotes = []
-        self.press_delay = 0.2
+        self.press_delay = 1
         self.already_pressed = 0
         self.already_released = False
 
@@ -90,7 +90,7 @@ class SubController(nuimo.ControllerListener):
         if val == 1:  # button press
             if self.active.enable_multiple_press:
                 self.already_pressed += 1
-                Timer(self.press_delay, self.check_press, [self.already_pressed])
+                Timer(self.press_delay, self.check_press, [self.already_pressed]).start()
             else:
                 self.active.on_press(self.device)
 
@@ -105,7 +105,12 @@ class SubController(nuimo.ControllerListener):
 
         elif 3 <= val <= 6:  # SWIPE
             direction = Direction(val - 3)
-            self.active.on_swipe(direction, self.device)
+            if direction == Direction.LEFT:  # Change active Remote
+                self.change_active(-1)
+            elif direction == Direction.RIGHT:
+                self.change_active(1)
+            else:
+                self.active.on_swipe(direction, self.device)
         elif 8 <= val <= 11:  # TOUCH
             direction = Direction(val - 8)
             if direction == Direction.BOTTOM:  # Indicate active Remote
@@ -115,12 +120,7 @@ class SubController(nuimo.ControllerListener):
 
         elif 12 <= val <= 15:  # LONG TOUCH
             direction = Direction(val - 12)
-            if direction == Direction.LEFT:  # Change active Remote
-                self.change_active(-1)
-            elif direction == Direction.RIGHT:
-                self.change_active(1)
-            else:
-                self.active.on_long_touch(direction, self.device)
+            self.active.on_long_touch(direction, self.device)
 
         elif val == 16:  # ROTATION
             self.active.on_rotate(event.value, self.device)
@@ -170,9 +170,8 @@ class Device:
     def send_matrix(self, matrix, interval=3, fading=True):
         self.controller.display_matrix(nuimo.LedMatrix(matrix), interval=interval, fading=fading)
 
-    def connect(self):
+    def connect(self, _continue=True):
         self.controller.connect()
-
 
 class DeviceManager:
 
