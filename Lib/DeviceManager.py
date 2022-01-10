@@ -1,5 +1,6 @@
 from collections import Iterable
 
+from time import sleep
 import nuimo
 import threading
 import paho.mqtt.client as mqtt
@@ -170,8 +171,16 @@ class Device:
     def send_matrix(self, matrix, interval=3, fading=True):
         self.controller.display_matrix(nuimo.LedMatrix(matrix), interval=interval, fading=fading)
 
-    def connect(self, _continue=True):
-        self.controller.connect()
+    def loop_connect(self, delay=2):
+        while True:
+            sleep(delay)
+            self.connect(_continue=False)
+
+    def connect(self, _continue=True, delay=2):
+        if not self.controller.is_connected():
+            self.controller.connect()
+        if _continue:
+            threading.Thread(target=self.loop_connect, args=(delay,)).start()
 
 class DeviceManager:
 
