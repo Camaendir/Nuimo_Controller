@@ -2,6 +2,7 @@ from matrices import *
 from .DeviceManager import Remote, Device, DeviceManager, Direction
 from time import sleep
 import json
+import threading
 
 class LightRemote(Remote):
     def __init__(self, indication_number, topic_prefix, device_manager: DeviceManager,
@@ -9,23 +10,23 @@ class LightRemote(Remote):
         super().__init__(get_indicates_matrix(base_matrix, indication_number), enable_multiple_press=enable_multiple_press)
         self.on_topic = topic_prefix + "/on"
         self.topic_prefix = topic_prefix
-        self.on = False
+        self.on = True
         self.mqtt = device_manager.get_mqtt_manager()
         self.mqtt.register_subscription(self.on_topic, self.mqtt_on_message)
 
     def light_animation(self, device: Device, reverse=False):
         if not reverse:
-            device.send_matrix(light_matrix_3, interval=1.1)
+            device.send_matrix(self, light_matrix_3, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix_2, interval=1.1)
+            device.send_matrix(self, light_matrix_2, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix, interval=1.1)
+            device.send_matrix(self, light_matrix, interval=1.1)
         else:
-            device.send_matrix(light_matrix, interval=1.1)
+            device.send_matrix(self, light_matrix, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix_2, interval=1.1)
+            device.send_matrix(self, light_matrix_2, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix_3, interval=1.1)
+            device.send_matrix(self, light_matrix_3, interval=1.1)
 
     def on_press(self, device: Device):
         self.on = not self.on
@@ -37,10 +38,10 @@ class LightRemote(Remote):
 
 
 class JSONLightRemote(Remote):
-    def __init__(self, indication_number, pub_topic, sub_topic,  device_manager, json_key = "state", json_values = ("OFF", "ON"),  base_matrix=lightbulb_matrix, enable_multiple_press=False):
+    def __init__(self, indication_number, pub_topic, sub_topic,  device_manager, json_key = "state", json_values = ("OFF", "ON"), base_matrix=lightbulb_matrix, enable_multiple_press=False):
         super().__init__(get_indicates_matrix(base_matrix, indication_number), enable_multiple_press=enable_multiple_press)
         self.pub_topic = pub_topic
-        self.on = False
+        self.on = True
         self.mqtt = device_manager.get_mqtt_manager()
         self.mqtt.register_subscription(sub_topic, self.mqtt_on_message)
         self.json_key = json_key
@@ -48,22 +49,22 @@ class JSONLightRemote(Remote):
 
     def light_animation(self, device: Device, reverse=False):
         if not reverse:
-            device.send_matrix(light_matrix_3, interval=1.1)
+            device.send_matrix(self, light_matrix_3, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix_2, interval=1.1)
+            device.send_matrix(self, light_matrix_2, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix, interval=1.1)
+            device.send_matrix(self, light_matrix, interval=1.1)
         else:
-            device.send_matrix(light_matrix, interval=1.1)
+            device.send_matrix(self, light_matrix, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix_2, interval=1.1)
+            device.send_matrix(self, light_matrix_2, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix_3, interval=1.1)
+            device.send_matrix(self, light_matrix_3, interval=1.1)
 
     def on_press(self, device: Device):
         self.on = not self.on
         self.mqtt.publish(self.pub_topic, json.dumps({self.json_key: self.json_values[int(self.on)]}))
-        self.light_animation(device, reverse=not self.on)
+        threading.Thread(target=self.light_animation, args=(device, not self.on)).start()
 
     def mqtt_on_message(self, paylaod):
         data = json.loads(paylaod.decode())
@@ -85,7 +86,7 @@ class BrightnessLightRemote(LightRemote):
         self.value += self.slow_acceleration_curve(value)
         self.value = min(100, self.value)
         self.value = max(0, self.value)
-        device.send_matrix(get_matrix_from_number(int(self.value)), interval=1, fading=True)
+        device.send_matrix(self, get_matrix_from_number(int(self.value)), interval=1, fading=True)
         self.mqtt.publish(self.brightness_topic + "/debounce", int(self.value))
 
 
@@ -100,18 +101,18 @@ class LumibaerRemote(BrightnessLightRemote):
     def on_swipe(self, direction: Direction, device: Device):
         if direction == Direction.TOP:
             self.mqtt.publish(self.topic_prefix + "/status", 1)
-            device.send_matrix(star_matrix, interval=3)
+            device.send_matrix(self, star_matrix, interval=3)
         elif direction == Direction.BOTTOM:
             self.mqtt.publish(self.topic_prefix + "/status", 0)
-            device.send_matrix(lightbulb_matrix, interval=3)
+            device.send_matrix(self, lightbulb_matrix, interval=3)
         elif direction == Direction.RIGHT:
             self.color_status = (self.color_status + 1) % len(self.colors)
             self.mqtt.publish(self.topic_prefix + "/color/set", self.color_status)
-            device.send_matrix(self.colors[self.color_status])
+            device.send_matrix(self, self.colors[self.color_status])
         elif direction == Direction.LEFT:
             self.color_status = (self.color_status - 1) % len(self.colors)
             self.mqtt.publish(self.topic_prefix + "/color/set", self.color_status)
-            device.send_matrix(self.colors[self.color_status])
+            device.send_matrix(self, self.colors[self.color_status])
 
 
 class SignRemote(BrightnessLightRemote):
@@ -123,10 +124,10 @@ class SignRemote(BrightnessLightRemote):
     def on_swipe(self, direction: Direction, device: Device):
         if direction == direction.TOP:
             self.mqtt.publish(self.topic_prefix + "/status", 1)
-            device.send_matrix(snake_matrix, interval=3)
+            device.send_matrix(self, snake_matrix, interval=3)
         elif direction == direction.BOTTOM:
             self.mqtt.publish(self.topic_prefix + "/status", 0)
-            device.send_matrix(lightbulb_matrix, interval=3)
+            device.send_matrix(self, lightbulb_matrix, interval=3)
         else:
             super().on_swipe(direction, device)
 

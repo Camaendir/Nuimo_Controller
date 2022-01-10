@@ -30,7 +30,7 @@ class HueRemote(Remote):
         self.value += value / 300
         self.value = min(100, self.value)
         self.value = max(0, self.value)
-        device.send_matrix(get_matrix_from_number(int(self.value)), interval=1, fading=True)
+        device.send_matrix(self, get_matrix_from_number(int(self.value)), interval=1, fading=True)
         if self.is_group:
             self.b.set_group(self.name, "bri", int(self.value * 2.54))
         else:
@@ -38,17 +38,17 @@ class HueRemote(Remote):
 
     def light_animation(self, device: Device, reverse=False, ):
         if not reverse:
-            device.send_matrix(light_matrix_3, interval=1.1)
+            device.send_matrix(self, light_matrix_3, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix_2, interval=1.1)
+            device.send_matrix(self, light_matrix_2, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix, interval=1.1)
+            device.send_matrix(self, light_matrix, interval=1.1)
         else:
-            device.send_matrix(light_matrix, interval=1.1)
+            device.send_matrix(self, light_matrix, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix_2, interval=1.1)
+            device.send_matrix(self, light_matrix_2, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix_3, interval=1.1)
+            device.send_matrix(self, light_matrix_3, interval=1.1)
 
     def on_press(self, device: Device):
         self.on = not self.on

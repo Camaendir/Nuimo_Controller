@@ -14,17 +14,17 @@ class LightRemote(Remote):
 
     def light_animation(self, device: Device, reverse=False):
         if not reverse:
-            device.send_matrix(light_matrix_3, interval=1.1)
+            device.send_matrix(self, light_matrix_3, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix_2, interval=1.1)
+            device.send_matrix(self, light_matrix_2, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix, interval=1.1)
+            device.send_matrix(self, light_matrix, interval=1.1)
         else:
-            device.send_matrix(light_matrix, interval=1.1)
+            device.send_matrix(self, light_matrix, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix_2, interval=1.1)
+            device.send_matrix(self, light_matrix_2, interval=1.1)
             sleep(1)
-            device.send_matrix(light_matrix_3, interval=1.1)
+            device.send_matrix(self, light_matrix_3, interval=1.1)
 
     def send_http(self, path, message):
         requests.post("http://" + self.http_ip + path, data=message)
@@ -53,7 +53,7 @@ class BrightnessLightRemote(LightRemote):
         self.value += self.slow_acceleration_curve(value)
         self.value = min(100, self.value)
         self.value = max(0, self.value)
-        device.send_matrix(get_matrix_from_number(int(self.value)), interval=1, fading=True)
+        device.send_matrix(self, get_matrix_from_number(int(self.value)), interval=1, fading=True)
         self.send_http("/bri", str(int(self.value)))
 
 
@@ -73,15 +73,15 @@ class LumibaerRemote(BrightnessLightRemote):
     def change_animation(self, device: Device):
         self.send_http("/sat", str(self.color_values[self.color_status][1]))
         self.send_http("/hue", str(self.color_values[self.color_status][0]))
-        device.send_matrix(self.colors_matrices[self.color_status])
+        device.send_matrix(self, self.colors_matrices[self.color_status])
 
     def on_swipe(self, direction: Direction, device: Device):
         if direction == Direction.TOP:
             self.send_http("/ani", str(1))
-            device.send_matrix(star_matrix, interval=3)
+            device.send_matrix(self, star_matrix, interval=3)
         elif direction == Direction.BOTTOM:
             self.send_http("/ani", str(0))
-            device.send_matrix(lightbulb_matrix, interval=3)
+            device.send_matrix(self, lightbulb_matrix, interval=3)
         elif direction == Direction.RIGHT:
             self.color_status = (self.color_status + 1) % len(self.color_values)
             self.change_animation(device)

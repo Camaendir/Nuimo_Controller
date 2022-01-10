@@ -1,6 +1,6 @@
-from collections import Iterable
+import collections
 
-from time import sleep
+from time import sleep, time
 import nuimo
 import threading
 import paho.mqtt.client as mqtt
@@ -38,7 +38,7 @@ manager.run()
 
 class SubController(nuimo.ControllerListener):
 
-    def __init__(self, device):
+    def __init__(self, device, reset_active=(10,0)):
         self.device = device
         self.active: Remote = None
         self.active_index = -1
@@ -46,6 +46,8 @@ class SubController(nuimo.ControllerListener):
         self.press_delay = 1
         self.already_pressed = 0
         self.already_released = False
+        self.reset_active = reset_active
+        self.reset_active_timeout = time()
 
     def change_active(self, increase_by=1):
         if self.active:
@@ -81,7 +83,14 @@ class SubController(nuimo.ControllerListener):
                 self.active.on_multiple_press(self.already_pressed, self.device)
                 self.already_pressed = 0
 
+    def reset_active_to_default(self):
+        if self.reset_active and len(self.remotes) > self.reset_active[1] and time() - self.reset_active_timeout > self.reset_active[0]:
+            self.active_index = self.reset_active[1]
+            self.active = self.remotes[self.active_index]
+        self.reset_active_timeout = time()
+
     def received_gesture_event(self, event):
+        self.reset_active_to_default()
         if not self.active:
             return
         val = event.gesture.value
@@ -128,7 +137,7 @@ class SubController(nuimo.ControllerListener):
 
     def disconnect_succeeded(self):
         print("Device " + self.device.name + " with mac " + self.device.mac + " disconnected!\nTrying to reconnect...")
-        self.device.connect()
+        threading.Thread(target=self.device.connect).start()
 
     def started_connecting(self):
         print("Trying to connect to " + self.device.name)
@@ -162,25 +171,19 @@ class Device:
         self.subController.register_remote(remote)
 
     def register_remotes(self, remotes):
-        if isinstance(remotes, Iterable):
+        if isinstance(remotes, collections.Iterable):
             for r in remotes:
                 self._register(r)
         else:
             self._register(remotes)
 
-    def send_matrix(self, matrix, interval=3, fading=True):
-        self.controller.display_matrix(nuimo.LedMatrix(matrix), interval=interval, fading=fading)
+    def send_matrix(self, remote, matrix, interval=3, fading=True):
+        if remote == self.subController.active:
+            self.controller.display_matrix(nuimo.LedMatrix(matrix), interval=interval, fading=fading)
 
-    def loop_connect(self, delay=2):
-        while True:
-            sleep(delay)
-            self.connect(_continue=False)
+    def connect(self):
+        self.controller.connect()
 
-    def connect(self, _continue=True, delay=2):
-        if not self.controller.is_connected():
-            self.controller.connect()
-        if _continue:
-            threading.Thread(target=self.loop_connect, args=(delay,)).start()
 
 class DeviceManager:
 
@@ -199,9 +202,8 @@ class DeviceManager:
 
     def run(self):
         for device in self.devices:
-            device.connect()
-        x = threading.Thread(target=self.manager.run)
-        x.start()
+            threading.Thread(target=device.connect).start()
+        threading.Thread(target=self.manager.run).start()
 
 
 class Remote:
@@ -214,7 +216,7 @@ class Remote:
         self.active = True
 
     def indicate(self, device: Device):
-        device.send_matrix(self.light_up_matrix, interval=4)
+        device.send_matrix(self, self.light_up_matrix, interval=4)
 
     def deactivate(self, device: Device):
         self.active = False

@@ -18,7 +18,7 @@ class SpotifyRemote(Remote):
         if time() - self.timer > 5:
             v = get_volume()
             if not v:
-                device.send_matrix(stop_matrix, interval=1)
+                device.send_matrix(self, stop_matrix, interval=1)
                 return
             self.value = v
         sign = -1 if value < 0 else 1
@@ -29,46 +29,46 @@ class SpotifyRemote(Remote):
         self.value = max(0, self.value)
         success = set_volume(int(self.value))
         if not success:
-            device.send_matrix(stop_matrix, interval=1)
+            device.send_matrix(self, stop_matrix, interval=1)
         else:
-            device.send_matrix(get_matrix_from_number(int(self.value)), interval=1, fading=True)
+            device.send_matrix(self, get_matrix_from_number(int(self.value)), interval=1, fading=True)
         self.timer = time()
 
     def on_press(self, device: Device):
         r = play_pause()
         if r == 0:
-            device.send_matrix(pause_matrix)
+            device.send_matrix(self, pause_matrix)
         elif r == 1:
-            device.send_matrix(play_matrix)
+            device.send_matrix(self, play_matrix)
         else:
-            device.send_matrix(stop_matrix)
+            device.send_matrix(self, stop_matrix)
     
     def on_multiple_press(self, value, device: Device):
         if value == 2:
             next_song()
-            device.send_matrix(next_matrix)
+            device.send_matrix(self, next_matrix)
         elif value == 3:
             previous_song()
-            device.send_matrix(last_matrix)
+            device.send_matrix(self, last_matrix)
     
     def on_long_touch(self, direction: Direction, device: Device):
         if direction == Direction.LEFT:
             previous_song()
-            device.send_matrix(last_matrix)
+            device.send_matrix(self, last_matrix)
         if direction == Direction.RIGHT:
             next_song()
-            device.send_matrix(next_matrix)
+            device.send_matrix(self, next_matrix)
 
     def on_swipe(self, direction, device: Device):
         if direction == Direction.LEFT:
             previous_song()
-            device.send_matrix(last_matrix)
+            device.send_matrix(self, last_matrix)
         elif direction == Direction.RIGHT:
             next_song()
-            device.send_matrix(next_matrix)
+            device.send_matrix(self, next_matrix)
         elif direction == Direction.TOP:
             transfer_to(self.device_id)
-            device.send_matrix(loudspeaker_matrix)
+            device.send_matrix(self, loudspeaker_matrix)
         elif direction == Direction.BOTTOM:
             play_song_current_or_new_device(self.playlist_url, self.device_id)
-            device.send_matrix(heart_matrix)
+            device.send_matrix(self, heart_matrix)
