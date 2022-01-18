@@ -1,4 +1,4 @@
-from DeviceManager import Device, Remote
+from .DeviceManager import Device, Remote
 from matrices import *
 from time import sleep
 from env import phillips_hue_bridge_ip
@@ -7,10 +7,16 @@ from phue import Bridge
 
 class HueRemote(Remote):
 
-    def __init__(self, light_indicator, device_group_name, is_group=True, has_brightness=True,
+    def __init__(self, light_indicator, device_group_name, acceleration_curve="slow", is_group=True, has_brightness=True,
                  base_matrix=lightbulb_matrix):
         super().__init__(get_indicates_matrix(base_matrix, light_indicator), )
         self.has_brightness = has_brightness
+        if acceleration_curve not in ("slow", "fast"):
+            print("Hue acceleration curve must be either 'slow' or 'fast'")
+            print(f"Got {acceleration_curve}")
+            print("Reverting to default acceleration curve 'slow'")
+            acceleration_curve = "slow"
+        self.acceleration_curve = acceleration_curve
         self.is_group = is_group
         self.b = Bridge(phillips_hue_bridge_ip)
         self.b.connect()
@@ -27,6 +33,10 @@ class HueRemote(Remote):
     def on_rotate(self, value, device: Device):
         if not self.has_brightness:
             return
+        if self.acceleration_curve == "slow":
+            value = self.slow_acceleration_curve(value)
+        else:
+            value = self.fast_acceleration_curve(value)
         self.value += value / 300
         self.value = min(100, self.value)
         self.value = max(0, self.value)

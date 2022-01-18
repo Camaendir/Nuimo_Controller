@@ -1,4 +1,5 @@
 import collections
+import sys
 
 from time import sleep, time
 import nuimo
@@ -201,9 +202,19 @@ class DeviceManager:
         self.devices.append(device)
 
     def run(self):
+        print("Starting device manager")
         for device in self.devices:
             threading.Thread(target=device.connect).start()
-        threading.Thread(target=self.manager.run).start()
+        try:
+            self.manager.run()
+        except KeyboardInterrupt:
+            print("Stopping...")
+            for device in self.devices:
+                device.controller.disconnect()
+            print("Stopped all devices, stopping manager...")
+            self.manager.stop()
+            print("Stopped manager, exiting")
+            sys.exit(0)
 
 
 class Remote:
