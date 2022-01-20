@@ -7,8 +7,14 @@ from matrices import *
 
 class SpotifyRemote(Remote):
 
-    def __init__(self, light_up_matrix=music_matrix, device_id="7a0dbf97d642f2b3138936c4286763ebe99fff9b", playlist_url="spotify:playlist:3NWvrg2ZiU43QoFc87brzl", enable_multiple_press=True):
+    def __init__(self, light_up_matrix=music_matrix, device_id="7a0dbf97d642f2b3138936c4286763ebe99fff9b", playlist_url="spotify:playlist:3NWvrg2ZiU43QoFc87brzl", enable_multiple_press=True, acceleration_curve="slow"):
         super().__init__(light_up_matrix, enable_multiple_press=enable_multiple_press)
+        if acceleration_curve not in ("slow", "fast"):
+            print("Spotify acceleration curve must be either 'slow' or 'fast'")
+            print(f"Got {acceleration_curve}")
+            print("Reverting to default acceleration curve 'slow'")
+            acceleration_curve = "slow"
+        self.acceleration_curve = acceleration_curve
         self.value = get_volume()
         self.playlist_url = playlist_url
         self.device_id = device_id
@@ -21,10 +27,11 @@ class SpotifyRemote(Remote):
                 device.send_matrix(self, stop_matrix, interval=1)
                 return
             self.value = v
-        sign = -1 if value < 0 else 1
-        value = abs(value)
-        value = pow(value, 1.6) * 0.00015
-        self.value += (sign * value)
+        if self.acceleration_curve == "slow":
+            value = self.slow_acceleration_curve(value)
+        else:
+            value = self.fast_acceleration_curve(value)
+        self.value += value
         self.value = min(100, self.value)
         self.value = max(0, self.value)
         success = set_volume(int(self.value))
