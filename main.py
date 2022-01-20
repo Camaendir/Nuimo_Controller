@@ -11,7 +11,7 @@ manager = DeviceManager()
 device1 = Device(manager, mac1, "Table - Black")
 device2 = Device(manager, mac2, "Desk - White")
 
-spotify = SpotifyRemote()
+spotify = SpotifyRemote(device_id = "7a0dbf97d642f2b3138936c4286763ebe99fff9b", playlist_url="spotify:playlist:5ZKHZjpBcr33a2N4BiCXcj")
 kater = JSONLightRemote(0, "ha/kater/set", "ha/kater/is", manager)
 
 device1.register_remotes([spotify, kater]), 
