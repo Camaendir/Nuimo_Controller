@@ -90,6 +90,7 @@ class MultiplePlaylistSpotifyRemote(SpotifyRemote):
         self.playlist_index = 0
         self.timer = -1
         self.selection_timeout = selection_timeout
+        self.selection_value = 0
 
     def on_press(self, device: Device):
         self.check_reset()
@@ -110,17 +111,19 @@ class MultiplePlaylistSpotifyRemote(SpotifyRemote):
             super().on_multiple_press(value, device)
 
     def check_reset(self):
-        if time() - self.timer > self.selection_timeout:
+        if self.selects_playlist and time() - self.timer > self.selection_timeout:
             self.reset_selection()
             return True
         return False
 
     def reset_selection(self):
+        print("Reset select")
         self.selects_playlist = False
         self.playlist_index = 0
         self.timer = -1
 
     def change_selection(self, amount, device: Device):
+        print("Change seletion")
         self.playlist_index += amount
         self.playlist_index = self.playlist_index % len(self.playlists_urls)
         device.send_matrix(self, self.playlist_matrices[self.playlist_index])
@@ -128,28 +131,28 @@ class MultiplePlaylistSpotifyRemote(SpotifyRemote):
     def on_rotate(self, value, device: Device):
         self.check_reset()
         if self.selects_playlist:
-            print(self.value)
+            self.timer = time()
+            self.selection_value += value
+            if self.selection_value > 200:
+                self.change_selection(1, device)
+                self.selection_value = 0
+            if self.selection_value < -200:
+                self.change_selection(-1, device)
+                self.selection_value = 0
+            print(self.selection_value)
         else:
             super().on_rotate(value, device)
 
     def on_swipe(self, direction, device: Device):
         self.check_reset()
-        if direction == Direction.TOP:
+        if direction == Direction.BOTTOM:
             if not self.selects_playlist:
                 self.selects_playlist = True
                 device.send_matrix(self, self.playlist_matrices[self.playlist_index])
-        elif direction == Direction.BOTTOM:
+                self.timer = time()
+        elif direction == Direction.TOP:
             if self.selects_playlist:
                 self.reset_selection()
-                super().on_swipe(direction, device)
-        elif direction == Direction.RIGHT:
-            if self.selects_playlist:
-                self.change_selection(1, device)
-            else:
-                super().on_swipe(direction, device)
-        elif direction == Direction.LEFT:
-            if self.selects_playlist:
-                self.change_selection(-1, device)
             else:
                 super().on_swipe(direction, device)
         else:

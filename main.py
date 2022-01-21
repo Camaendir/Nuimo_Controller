@@ -27,7 +27,7 @@ matrices = [
 spotify = MultiplePlaylistSpotifyRemote(playlist_matrices=matrices, playlists_urls=playlists, device_id="7a0dbf97d642f2b3138936c4286763ebe99fff9b")
 kater = JSONLightRemote(0, "ha/kater/set", "ha/kater/is", manager)
 
-device1.register_remotes([spotify, kater]), 
+device1.register_remotes([spotify]), 
 device2.register_remotes([spotify, kater])
 
 manager.run()
