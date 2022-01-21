@@ -95,6 +95,7 @@ class MultiplePlaylistSpotifyRemote(SpotifyRemote):
     def on_press(self, device: Device):
         self.check_reset()
         if self.selects_playlist:
+            print(f"Playing playlist {self.playlist_index} -> {self.playlists_urls[self.playlist_index]} on device {self.device_id}")
             play_song_current_or_new_device(self.playlists_urls[self.playlist_index], self.device_id)
             self.reset_selection()
         else:
