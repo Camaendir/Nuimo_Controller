@@ -9,7 +9,11 @@
 
     This step depends on what type of controller you use. If you use a Spotipy-Controller you need to add your credentials in there (see env_example.py). For an MQTT connection add your MQTT host and port. If you use Phillips Hue add your Hue-Bridge IP in there.
 
-### Available Controller
+### Available Remotes
 
-- **Spotipy-Controller**: control your Music!
-- **Lighting-Controller**: control your Lighting with state,brightness,color and animations (through MQTT)
+- **Spotipy-Remote**: control your Music!
+- **MQTT-Lighting-Remote**: control your Lighting with state,brightness,color and animations (through MQTT)
+- **Hue-Remote**: control your HUE lights with your nuimo.
+
+### Using the remotes
+For an example on how to use the controller see `main.py`.
