@@ -201,9 +201,11 @@ class LumibaerRemote(Remote):
 
     def on_swipe(self, direction: Direction, device: Device):
         if direction == Direction.TOP:
+            device.send_matrix(self, arrow_matrix)
             self.rotate_status = 1
             self.rotate_timer = time()
         elif direction == Direction.BOTTOM:
+            device.send_matrix(self, star_matrix)
             self.rotate_status = 2
             self.rotate_timer = time()
 
