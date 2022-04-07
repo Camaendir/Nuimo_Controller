@@ -1,6 +1,6 @@
 /venv/
 nohup.out
-Lib/__pycache__/
+NuimoController/__pycache__/
 /__pycache__/
 env.py
 .cache

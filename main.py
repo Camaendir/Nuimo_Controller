@@ -1,7 +1,6 @@
-from Lib.DeviceManager import *
-from Lib.SpotifyRemote import SpotifyRemote, MultiplePlaylistSpotifyRemote
-from Lib.MQTTLightRemote import SignRemote, JSONLightRemote
-from Lib.HTTPLightRemote import LumibaerRemote
+from NuimoController.DeviceManager import *
+from NuimoController.SpotifyRemote import SpotifyRemote, MultiplePlaylistSpotifyRemote
+from NuimoController.MQTTLightRemote import SignRemote, JSONLightRemote
 from matrices import f_2_matrix, monoid_matrix, phi_matrix
 
 mac1 = "dc:1c:77:d0:9a:d9"
