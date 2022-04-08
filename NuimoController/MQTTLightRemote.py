@@ -106,7 +106,7 @@ class LumibaerRemote(Remote):
         self.color_topic = "/Lumibaer/parameter"
         self.brightness_topic = "/Lumibaer/brightness"
 
-        self.on = False
+        self.on = True
 
         self.brightness = 50
 
@@ -122,13 +122,13 @@ class LumibaerRemote(Remote):
         self.rotate_timer = 0
         self.rotate_timeout = 3
         self.rotate_value = 0
-        self.rotate_change_selection_value = 200
+        self.rotate_change_selection_value = 10
 
     def send_status(self, status):
-        self.mqtt.publish(self.status_topic, status)
+        self.mqtt.publish(self.status_topic, str(status))
 
     def send_brightness(self, brightness):
-        self.mqtt.publish(self.brightness_topic, brightness)
+        self.mqtt.publish(self.brightness_topic, str(brightness))
 
     def light_animation(self, device: Device, reverse=False):
         if not reverse:
@@ -145,6 +145,7 @@ class LumibaerRemote(Remote):
             device.send_matrix(self, light_matrix_3, interval=0.5)
 
     def on_press(self, device: Device):
+        self.check_reset()
         self.on = not self.on
         self.send_status(self.status if self.on else 0)
         self.light_animation(device, reverse=not self.on)
@@ -188,7 +189,7 @@ class LumibaerRemote(Remote):
                 self.color_index += 1
                 self.color_index %= len(self.color_matrices)
                 self.rotate_value = 0
-                device.send_matrix(self, self.color_matrices[self.color_index])
+                device.send_matrix(self, self.color_index)
                 if self.on:
                     self.send_color(self.colors[self.color_index])
             elif self.rotate_value < (-1 * self.rotate_change_selection_value):
@@ -197,17 +198,25 @@ class LumibaerRemote(Remote):
                 self.rotate_value = 0
                 device.send_matrix(self, self.color_matrices[self.color_index])
                 if self.on:
-                    self.send_color(self.colors[self.color_index])
+                    self.send_color(self.color_index)
 
     def on_swipe(self, direction: Direction, device: Device):
         if direction == Direction.TOP:
-            device.send_matrix(self, arrow_matrix)
-            self.rotate_status = 1
-            self.rotate_timer = time()
+            if self.rotate_status == 2:
+                self.rotate_status = 0
+                device.send_matrix(self, get_matrix_from_number(int(self.brightness)))
+            else:
+                device.send_matrix(self, arrow_matrix)
+                self.rotate_status = 1
+                self.rotate_timer = time()
         elif direction == Direction.BOTTOM:
-            device.send_matrix(self, star_matrix)
-            self.rotate_status = 2
-            self.rotate_timer = time()
+            if self.rotate_status == 1:
+                self.rotate_status = 0
+                device.send_matrix(self, get_matrix_from_number(int(self.brightness)))
+            else:
+                device.send_matrix(self, star_matrix)
+                self.rotate_status = 2
+                self.rotate_timer = time()
 
 
 class SignRemote(BrightnessLightRemote):
